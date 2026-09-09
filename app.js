@@ -1,7 +1,7 @@
 // A plugin window never gets window.api, Node, or the filesystem — the whole
 // capability it has is window.pluginApi, scoped to the table(s) this plugin
 // declared in dracondex-plugin.json.
-// See https://github.com/LDKTC/App-DraconDex/blob/main/docs/PLUGINS.md
+// See https://github.com/ZYDRAXYL/DraconDex-APP/blob/main/docs/PLUGINS.md
 //
 // window.extApi is the pre-v4.2.0 alias for the same object; falling back to it
 // keeps this page working on older builds of the app.
