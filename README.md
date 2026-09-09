@@ -1,6 +1,6 @@
-# DraconDex-Plugin-Template
+# DraconDex-PGI-Template
 
-Starter template for building a [DraconDex](https://github.com/LDKTC/App-DraconDex)
+Starter template for building a [DraconDex](https://github.com/ZYDRAXYL/DraconDex-APP)
 plugin. Use this repo as a base: fork/use-as-template it, edit the manifest and
 the files it lists, push, then install it in the app by pasting your repo's
 link.
@@ -15,7 +15,7 @@ opens in its own window with **no access to the main app's data or
 `window.api`** — only to the SQLite table(s) it declares for itself, through
 `window.pluginApi`. For the full architecture and the honest list of what this
 does and doesn't protect against, see
-[App-DraconDex's `docs/PLUGINS.md`](https://github.com/LDKTC/App-DraconDex/blob/main/docs/PLUGINS.md).
+[DraconDex-APP's `docs/PLUGINS.md`](https://github.com/ZYDRAXYL/DraconDex-APP/blob/main/docs/PLUGINS.md).
 
 ## Quick start
 
@@ -60,7 +60,7 @@ A small marker file at the repo root:
 It isn't part of the install flow (`dracondex-plugin.json` still owns that)
 and isn't listed in `files`, so it's never downloaded. Its only job is to be
 *checked for* — DraconDex's Settings → Plugin page shows a default
-"install from @LDKTC" recommendation list, and only repos that have a
+"install from @ZYDRAXYL" recommendation list, and only repos that have a
 `.dracondex` file at their root are eligible to show up there (this
 template repo itself is always excluded from that list). Keep the file when
 you use this repo as a template so your published plugin is discoverable
@@ -87,7 +87,7 @@ the same way.
 }
 ```
 
-Rules the app enforces on install (`validateManifest` in App-DraconDex's
+Rules the app enforces on install (`validateManifest` in DraconDex-APP's
 `src/db/plugin-manifest.js`):
 
 - `id` — `^[a-z0-9_]{1,20}$`. Becomes part of the plugin's real DB table
