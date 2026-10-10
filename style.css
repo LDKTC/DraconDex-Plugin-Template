@@ -1,18 +1,38 @@
-/* Optional — a plugin can style itself however it likes. These tokens mirror
-   DraconDex's default dark theme (css/tokens.css) so the window doesn't look
-   pasted in; the app does NOT inject its stylesheets into plugin windows, so
-   everything a plugin wants has to live in its own files. */
+/* Optional — a plugin can style itself however it likes. These are
+   DraconDex 5's own built-in palettes (DraconDex-EXE electron/css/themes.css):
+   `daylight` for a light OS, `midnight` for a dark one — the app does NOT
+   inject its stylesheets or its current theme into plugin windows, so
+   following the OS is the honest choice. --accent is the AA-checked value
+   (white on it >= 4.5:1). Every colour is defined on bare :root first, so
+   nothing is undefined when the media query does not match. */
 :root {
-  --bg: #0f0f13;
-  --surface: #18181f;
-  --raised: #22222d;
-  --hover: #2a2a38;
-  --border: #2e2e3f;
-  --t1: #e8e8f0;
-  --t2: #9090a8;
-  --accent: #6366f1;
-  --danger: #ef4444;
+  --bg: #f4f6fb;
+  --surface: #ffffff;
+  --raised: #eef1f7;
+  --hover: #e2e7f0;
+  --border: #ccd3df;
+  --t1: #172033;
+  --t2: #596274;
+  --accent: #2563eb;
+  --accent-h: #1d4ed8;
+  --danger: #dc2626;
   --r: 8px;
+  color-scheme: light dark;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #0f0f13;
+    --surface: #18181f;
+    --raised: #22222d;
+    --hover: #2a2a38;
+    --border: #2e2e3f;
+    --t1: #e8e8f0;
+    --t2: #9090a8;
+    --accent: #585ced;
+    --accent-h: #818cf8;
+    --danger: #ef4444;
+  }
 }
 
 * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -22,7 +42,7 @@
 [hidden] { display: none !important; }
 
 body {
-  font-family: system-ui, sans-serif;
+  font-family: "Segoe UI", system-ui, -apple-system, "Noto Sans Thai", sans-serif;
   background: var(--bg);
   color: var(--t1);
   font-size: 13px;
@@ -104,6 +124,8 @@ button:hover { background: var(--hover); }
   border-color: var(--accent);
   color: #fff;
 }
+
+#submit-btn:hover { background: var(--accent-h); border-color: var(--accent-h); }
 
 ul { list-style: none; }
 

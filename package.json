@@ -1,0 +1,15 @@
+{
+  "name": "dracondex-pgi-template",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Minimal starter for a DraconDex 5 plugin — one window, one table",
+  "type": "module",
+  "scripts": {
+    "validate": "node tools/validate-manifest.mjs",
+    "contract": "node tools/plugin-contract.mjs",
+    "contract:upstream": "node tools/plugin-contract.mjs --upstream",
+    "contract:vendor": "node tools/plugin-contract.mjs --vendor",
+    "check": "node --check app.js && npm run contract && npm run validate"
+  },
+  "license": "MIT"
+}
