@@ -2,15 +2,36 @@
 
 This file guides Claude Code (and other agents) working in a
 [DraconDex](https://github.com/ZYDRAXYL/DraconDex-APP) plugin repo. This repo
-itself is the **starter template** — forked/used-as-template to create new
-plugins. Keep this file generic and accurate for that purpose; when you fork
-this repo into a real plugin, update the project-specific bits (title, table
-names, feature list) but keep the architecture/constraints sections, since
-they describe the platform, not this template's business logic.
+itself is the **minimal starter template** for DraconDex 5 — one window, one
+table — forked/used-as-template to create new plugins. Keep this file generic
+and accurate for that purpose; when you fork this repo into a real plugin,
+update the project-specific bits (title, table names, feature list) but keep
+the architecture/constraints sections, since they describe the platform, not
+this template's business logic.
 
 Full human-facing docs (quick start, manifest field rules, install-link
-shapes, legacy `extApi` support) are in [README.md](README.md) — read that
-first for anything not covered below.
+shapes, adding a side panel, legacy `extApi` support) are in
+[README.md](README.md) — read that first for anything not covered below.
+
+## This repo is in the DraconDex chain
+
+`DraconDex-PGI-Template` sits at the tail of all three chains
+(`… > PGI, EXT`, `chain/chain.json`, key `PGI`). Two edges arrive, none leave:
+
+| edge | carries | lands as |
+|---|---|---|
+| APP → PGI | `claude-tooling` | `.claude/`, `chain/`, `tools/chain-*.mjs`, `tools/validate-manifest.mjs`, `tools/plugin-contract.mjs` — **edit them in DraconDex-APP**, never here |
+| EXE → PGI | `plugin-contract` | `tools/plugin-manifest.cjs` (byte-identical copy of EXE's `electron/src/db/plugin-manifest.js`) + `plugin-contract.lock.json` |
+
+What this repo owns: `dracondex-plugin.json`, `index.html`, `app.js`,
+`style.css`, `.dracondex`, the CI workflow, README and this file. Its sibling
+`DraconDex-EXT-Template` is the full template (window + side panel); keep the
+two consistent on platform facts.
+
+A plugin *made from* this template is not in the chain: the
+`extension-scaffold` skill removes `chain/` and the chain skills and keeps the
+contract (`tools/plugin-manifest.cjs`, `tools/validate-manifest.mjs`,
+`tools/plugin-contract.mjs`, the lock).
 
 ## What a DraconDex plugin is
 
@@ -30,8 +51,9 @@ plugin to reach data that isn't its own. See DraconDex-APP's
 | `dracondex-plugin.json` | Manifest: id, name, version, entry point, `files`, table schema, optional `panels`/`permissions`/`dependencies`. |
 | `index.html` | Entry point — must be listed in `files` and match `entry`. |
 | `app.js` | Plugin logic. Talks to its own table(s) via `window.pluginApi.table.*`. |
-| `style.css` | Optional styling; mirrors the app's dark theme tokens. |
-| `scripts/validate-manifest.mjs` | Local manifest check, same rules the app enforces on install. Not shipped (not in `files`). |
+| `style.css` | Optional styling; DraconDex 5's `daylight`/`midnight` palettes, following the OS. |
+| `tools/validate-manifest.mjs` | Local manifest check running the app's own `validateManifest()`. Not shipped (not in `files`). |
+| `tools/plugin-manifest.cjs` + `plugin-contract.lock.json` | The app's rules, vendored from DraconDex-EXE at a pinned release. Never hand-edit — `npm run contract` fails on it. |
 
 Only paths listed in the manifest's `files` are ever downloaded by an
 installing user — README, scripts, CI, and tests cost them nothing. Add new
@@ -55,7 +77,8 @@ source files to `files` when you add them, or they silently won't ship.
     or `FOREIGN KEY`.
   - every table gets an implicit `id INTEGER PRIMARY KEY AUTOINCREMENT` you
     don't declare and can't override.
-- Optional `panels` (dock into the Module Inspector slot, DraconDex 4.3.0+),
+- Optional `panels` (a page in the DraconDex 5 side panel; 4.3–4.x docked it
+  in place of the Module Inspector),
   `permissions.net`/`permissions.context` (declare allowed origins / context
   a panel can receive, 4.3.0+), and `dependencies` (auto-install other
   plugin repos, 4.8.0+) — see README for the full shape if you add these.
@@ -101,19 +124,28 @@ dark `#050506` background). Practical consequences:
 - **Nothing sanitizes your rendering** — treat stored rows as data; use
   `textContent`/DOM APIs, never `innerHTML`, for anything derived from a
   table or the network.
-- If you add a docked `panels` entry: it is **reloaded whenever DraconDex
-  re-renders its pane** (e.g. editing a tag is enough). Nothing may live only
-  in a JS variable — persist state to your table at the moment it exists, and
-  rebuild the panel's view from the table on every load.
+- If you add a `panels` entry (DraconDex 5 side panel): the host draws its
+  header and ×, so the panel page has **no** title bar; it stays open across
+  page changes and is **destroyed when closed** (on a 4.x host it was also
+  reloaded on every pane re-render). Nothing may live only in a JS variable —
+  persist state to your table at the moment it exists and rebuild from the
+  table on load. With `permissions.context: ["module"]` the host pushes a new
+  `context` message on every page change: keep `panel.onMessage` installed.
+  Design for the side panel's 220px minimum width.
+- Every HTML entry keeps the CSP `<meta>` from `index.html`: no remote
+  resources, no inline `style=""` (`style-src 'self'` drops it silently).
 
 ## Commands
 
 ```bash
-node scripts/validate-manifest.mjs   # same rules the app enforces on install
+npm run validate                     # the app's own validateManifest (vendored), first error first
+npm run contract                     # the vendored copy is byte-identical to the pin
+npm run contract:upstream            # has DraconDex-EXE moved the contract past the pin?
 node --check app.js                  # add every shipped .js file here as you add them
 ```
 
-CI (`.github/workflows/validate.yml`) runs both on every push/PR. No
+CI (`.github/workflows/validate.yml`) runs the contract check, the validator
+and `node --check` on every push/PR, plus an advisory upstream check. No
 dependencies to install, no build step — DraconDex downloads these files
 as-is, so don't introduce one without also updating how the plugin installs.
 
@@ -133,5 +165,7 @@ plugin's files and tables** — don't develop against data you care about.
    see the immutability warning above.
 3. Update `files`, `index.html`/`app.js`/`style.css` (or replace them),
    `README.md`, and this `CLAUDE.md`'s title/structure table for your plugin.
-4. Keep `scripts/validate-manifest.mjs` and the CI workflow, and extend the
+4. Keep `tools/validate-manifest.mjs`, `tools/plugin-manifest.cjs`,
+   `tools/plugin-contract.mjs`, the lock and the CI workflow; delete `chain/`
+   and `tools/chain-*.mjs`. Extend the
    `node --check` list as you add scripts.
